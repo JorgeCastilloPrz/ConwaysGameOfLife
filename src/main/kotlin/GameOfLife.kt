@@ -1,3 +1,5 @@
+import GenerationCount.Finite
+import GenerationCount.Infinite
 import arrow.core.*
 import arrow.core.extensions.list.semigroupal.times
 import arrow.mtl.State
@@ -58,22 +60,35 @@ private fun Universe.tick(): Tuple2<Universe, Unit> {
     return Tuple2(newGeneration, Unit)
 }
 
-private fun gameOfLife(): State<Universe, Unit> =
+sealed class GenerationCount {
+    object Infinite : GenerationCount()
+    data class Finite(val count: Int) : GenerationCount()
+}
+
+private fun gameOfLife(maxGenerations: GenerationCount = Infinite, currentGeneration: Int = 0): State<Universe, Unit> =
     State { universe: Universe ->
+        // State is pure since it defers the execution until you call run. Once we do it, it'll become unsafe.
         println(universe)
         universe.tick()
     }.flatMap(IdBimonad) {
-        Thread.sleep(1000)
-        gameOfLife()
+        when (maxGenerations) {
+            is Infinite -> gameOfLife(maxGenerations, currentGeneration + 1)
+            is Finite -> if (currentGeneration < maxGenerations.count) {
+                gameOfLife(maxGenerations, currentGeneration + 1)
+            } else {
+                State { Tuple2(listOf(), Unit) }
+            }
+        }
     }
 
 fun main() {
     // State provides a convenient run method to run it using an initial state.
-    gameOfLife().run(initialSeed())
+    gameOfLife(Finite(3)).run(initialSeed())
 }
 
 private fun initialSeed(): List<List<Cell>> =
     listOf(
-        listOf(Cell(false), Cell(true)),
-        listOf(Cell(false), Cell(false))
+        listOf(Cell(false), Cell(true), Cell(false)),
+        listOf(Cell(true), Cell(false), Cell(true)),
+        listOf(Cell(false), Cell(true), Cell(false))
     )
