@@ -18,6 +18,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "io.arrow-kt:arrow-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-generic:$arrow_version"
+    implementation "io.arrow-kt:arrow-mtl:$arrow_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
