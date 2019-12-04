@@ -10,10 +10,14 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
 }
 
 dependencies {
+    def arrow_version = "0.10.3"
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "io.arrow-kt:arrow-core:$arrow_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
