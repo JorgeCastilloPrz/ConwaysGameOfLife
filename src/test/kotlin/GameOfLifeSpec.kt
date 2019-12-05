@@ -36,7 +36,7 @@ class GameOfLifeSpec : StringSpec({
     }
 
     "Any live cell with two or three neighbors survives" {
-        forAll(UniverseGen(center = Cell.Alive(), aliveNeighbors = 2)) { universe ->
+        forAll(universeGenWith2or3AliveNeighbours(Cell.Alive())) { universe ->
             val finalState = gameOfLife(Finite(1)).run(IO.monad(), universe).fix().unsafeRunSync().a
 
             finalState[1][1].isAlive()
@@ -52,7 +52,7 @@ class GameOfLifeSpec : StringSpec({
     }
 
     "Any live cell with fewer than two live neighbours dies, as if by underpopulation." {
-        forAll(UniverseGen(center = Cell.Alive(), aliveNeighbors = 1)) { universe ->
+        forAll(universeGenFewerThan2AliveNeighbours(Cell.Alive())) { universe ->
             val finalState = gameOfLife(Finite(1)).run(IO.monad(), universe).fix().unsafeRunSync().a
 
             finalState[1][1].isDead()
@@ -60,7 +60,7 @@ class GameOfLifeSpec : StringSpec({
     }
 
     "Any live cell with more than three live neighbours dies, as if by overpopulation." {
-        forAll(UniverseGen(center = Cell.Alive(), aliveNeighbors = 4)) { universe ->
+        forAll(universeGenMoreThan3AliveNeighbours(Cell.Alive())) { universe ->
             val finalState = gameOfLife(Finite(1)).run(IO.monad(), universe).fix().unsafeRunSync().a
 
             finalState[1][1].isDead()
