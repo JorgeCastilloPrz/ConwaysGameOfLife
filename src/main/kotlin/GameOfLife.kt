@@ -43,8 +43,6 @@ fun Universe.cellPosition(cell: Cell): Option<Position> =
         }
     }
 
-// Neighbors
-
 fun Cell.neighbours(universe: Universe): List<Cell> {
     val deltas = listOf(-1, 0, 1) * listOf(-1, 0, 1) // ListK cartesian product to get all combinations
     return deltas
