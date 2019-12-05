@@ -19,12 +19,12 @@ private val Universe.sizeY: Int get() = get(0).size
 
 data class Position(val x: Int, val y: Int)
 
-fun Position.shiftBy(delta: Tuple2<Int, Int>) =
+fun Position.shiftByUnsafe(delta: Tuple2<Int, Int>) =
     copy(x = x + delta.a, y = y + delta.b)
 
 fun Option<Position>.shiftBy(universe: Universe, delta: Tuple2<Int, Int>): Option<Position> =
     flatMap { pos ->
-        val shifted = pos.shiftBy(delta)
+        val shifted = pos.shiftByUnsafe(delta)
         if (shifted.x in 0 until universe.sizeX && shifted.y in 0 until universe.sizeY) {
             shifted.some()
         } else {
