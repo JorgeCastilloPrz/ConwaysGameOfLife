@@ -19,15 +19,9 @@ private val Universe.sizeY: Int get() = get(0).size
 
 data class Position(val x: Int, val y: Int)
 
-/**
- * This variant is not safe since it shifts the position but can return a position out of the [Universe].
- */
-fun Position.shiftByUnsafe(delta: Tuple2<Int, Int>) =
-    copy(x = x + delta.a, y = y + delta.b)
-
 fun Option<Position>.shiftBy(universe: Universe, delta: Tuple2<Int, Int>): Option<Position> =
     flatMap { pos ->
-        val shifted = pos.shiftByUnsafe(delta)
+        val shifted = pos.copy(x = pos.x + delta.a, y = pos.y + delta.b)
         if (shifted.x in 0 until universe.sizeX && shifted.y in 0 until universe.sizeY) {
             shifted.some()
         } else {
