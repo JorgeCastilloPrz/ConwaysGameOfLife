@@ -1,51 +1,62 @@
 import GenerationCount.Finite
 import GenerationCount.Infinite
 import arrow.core.*
+import arrow.core.extensions.list.functorFilter.flattenOption
 import arrow.core.extensions.list.semigroupal.times
 import arrow.mtl.State
 import arrow.mtl.run
 import arrow.typeclasses.internal.IdBimonad
 
-private data class Cell(val isAlive: Boolean)
+class Cell(val isAlive: Boolean)
 
 private fun Cell.isDead() = !isAlive
 
-private typealias Universe = List<List<Cell>>
+typealias Universe = List<List<Cell>>
 
 private val Universe.sizeX: Int get() = size
 
 private val Universe.sizeY: Int get() = get(0).size
 
-private data class Position(val x: Int, val y: Int)
+data class Position(val x: Int, val y: Int)
 
-private fun Universe.cellPosition(cell: Cell): Option<Position> =
+fun Position.shiftBy(delta: Tuple2<Int, Int>) =
+    copy(x = x + delta.a, y = y + delta.b)
+
+fun Option<Position>.shiftBy(universe: Universe, delta: Tuple2<Int, Int>): Option<Position> =
+    flatMap { pos ->
+        val shifted = pos.shiftBy(delta)
+        if (shifted.x in 0 until universe.sizeX && shifted.y in 0 until universe.sizeY) {
+            shifted.some()
+        } else {
+            None
+        }
+    }
+
+fun Universe.cellPosition(cell: Cell): Option<Position> =
     this.flatten().indexOf(cell).let { index ->
         if (index == -1) {
             None
         } else {
-            val x = index / sizeY
-            val y = index / sizeX
+            val x = index / sizeX
+            val y = index % sizeX
             Some(Position(x, y))
         }
     }
 
 // Neighbors
 
-private fun Cell.neighbours(universe: Universe): List<Cell> {
+fun Cell.neighbours(universe: Universe): List<Cell> {
     val deltas = listOf(-1, 0, 1) * listOf(-1, 0, 1) // ListK cartesian product to get all combinations
     return deltas
-        .map { Position(it.a, it.b) }
-        .filter { pos ->
-            pos.x in 0 until universe.sizeX &&
-                    pos.y in 0 until universe.sizeY &&
-                    pos.some() != universe.cellPosition(this)
-        }
+        .filter { it.a != 0 || it.b != 0 }
+        .map { universe.cellPosition(this).shiftBy(universe, it) }
+        .flattenOption()
         .map { universe[it.x][it.y] }
 }
 
 private fun Cell.aliveNeighbours(universe: Universe): List<Cell> = neighbours(universe).filter { it.isAlive }
 
-private fun Universe.tick(): Tuple2<Universe, Unit> {
+private fun Universe.tick(): Tuple2<Universe, Universe> {
     val newGeneration = this.map { column ->
         column.map { cell ->
             val aliveNeighbors = cell.aliveNeighbours(this).size
@@ -57,7 +68,7 @@ private fun Universe.tick(): Tuple2<Universe, Unit> {
             }
         }.k()
     }.k()
-    return Tuple2(newGeneration, Unit)
+    return Tuple2(newGeneration, newGeneration)
 }
 
 sealed class GenerationCount {
@@ -65,7 +76,7 @@ sealed class GenerationCount {
     data class Finite(val count: Int) : GenerationCount()
 }
 
-private fun gameOfLife(maxGenerations: GenerationCount = Infinite, currentGeneration: Int = 0): State<Universe, Unit> =
+fun gameOfLife(maxGenerations: GenerationCount = Infinite, currentGeneration: Int = 0): State<Universe, Universe> =
     State { universe: Universe ->
         // State is pure since it defers the execution until you call run. Once we do it, it'll become unsafe.
         println(universe)
@@ -73,10 +84,10 @@ private fun gameOfLife(maxGenerations: GenerationCount = Infinite, currentGenera
     }.flatMap(IdBimonad) {
         when (maxGenerations) {
             is Infinite -> gameOfLife(maxGenerations, currentGeneration + 1)
-            is Finite -> if (currentGeneration < maxGenerations.count) {
+            is Finite -> if (currentGeneration < maxGenerations.count - 1) {
                 gameOfLife(maxGenerations, currentGeneration + 1)
             } else {
-                State { Tuple2(listOf(), Unit) }
+                State { Tuple2(it, it) }
             }
         }
     }
