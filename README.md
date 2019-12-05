@@ -20,4 +20,6 @@ This repository contains a solution that:
 - Uses [Arrow](https://arrow-kt.io/), a library for FP written in Kotlin.
 - Uses [KotlinTest](https://github.com/kotlintest/kotlintest), a library for Property-based Testing written in Kotlin, to test the solution.
 
-There Swift counter part using Bow [is here](https://github.com/truizlop/ConwaysGameOfLife).
+The Swift counter part using Bow [is here](https://github.com/truizlop/ConwaysGameOfLife).
+
+There's another pretty interesting approach using the `IO` Monad by @pedrovgs [here](https://github.com/pedrovgs/KotlinKatas/tree/master/src/main/kotlin/com/github/pedrovgs/gameoflife).
