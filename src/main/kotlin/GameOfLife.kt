@@ -3,6 +3,7 @@
 import GenerationCount.Finite
 import GenerationCount.Infinite
 import arrow.core.*
+import arrow.core.extensions.list.functorFilter.filterMap
 import arrow.core.extensions.list.functorFilter.flattenOption
 import arrow.core.extensions.list.semigroupal.times
 import arrow.mtl.State
@@ -50,8 +51,7 @@ fun Cell.neighbours(universe: Universe): List<Cell> {
     val deltas = listOf(-1, 0, 1) * listOf(-1, 0, 1) // ListK cartesian product to get all combinations
     return deltas
         .filter { it.a != 0 || it.b != 0 }
-        .map { universe.cellPosition(this).shiftBy(universe, it) }
-        .flattenOption()
+        .filterMap { universe.cellPosition(this).shiftBy(universe, it) }
         .map { universe[it.x][it.y] }
 }
 
