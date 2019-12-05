@@ -1,3 +1,5 @@
+@file:Suppress("CanSealedSubClassBeObject")
+
 import GenerationCount.Finite
 import GenerationCount.Infinite
 import arrow.core.*
@@ -7,9 +9,13 @@ import arrow.mtl.State
 import arrow.mtl.run
 import arrow.typeclasses.internal.IdBimonad
 
-class Cell(val isAlive: Boolean)
+sealed class Cell {
+    class Alive : Cell()
+    class Dead : Cell()
+}
 
-private fun Cell.isDead() = !isAlive
+fun Cell.isDead() = !isAlive()
+fun Cell.isAlive() = this is Cell.Alive
 
 typealias Universe = List<List<Cell>>
 
@@ -49,17 +55,17 @@ fun Cell.neighbours(universe: Universe): List<Cell> {
         .map { universe[it.x][it.y] }
 }
 
-private fun Cell.aliveNeighbours(universe: Universe): List<Cell> = neighbours(universe).filter { it.isAlive }
+private fun Cell.aliveNeighbours(universe: Universe): List<Cell> = neighbours(universe).filter { it is Cell.Alive }
 
 private fun Universe.tick(): Tuple2<Universe, Universe> {
     val newGeneration = this.map { column ->
         column.map { cell ->
             val aliveNeighbors = cell.aliveNeighbours(this).size
             when {
-                aliveNeighbors < 2 -> Cell(isAlive = false)
-                aliveNeighbors > 3 -> Cell(isAlive = false)
-                aliveNeighbors == 3 && cell.isDead() -> Cell(isAlive = true)
-                else -> Cell(isAlive = true)
+                aliveNeighbors < 2 -> Cell.Dead()
+                aliveNeighbors > 3 -> Cell.Dead()
+                aliveNeighbors == 3 && cell.isDead() -> Cell.Alive()
+                else -> Cell.Alive()
             }
         }.k()
     }.k()
@@ -94,7 +100,7 @@ fun main() {
 
 private fun initialSeed(): List<List<Cell>> =
     listOf(
-        listOf(Cell(false), Cell(true), Cell(false)),
-        listOf(Cell(true), Cell(false), Cell(true)),
-        listOf(Cell(false), Cell(true), Cell(false))
+        listOf(Cell.Dead(), Cell.Alive(), Cell.Dead()),
+        listOf(Cell.Alive(), Cell.Dead(), Cell.Alive()),
+        listOf(Cell.Dead(), Cell.Alive(), Cell.Dead())
     )
