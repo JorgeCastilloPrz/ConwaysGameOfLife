@@ -95,7 +95,7 @@ fun gameOfLife(
             is Finite -> if (currentGeneration < maxGenerations.count - 1) {
                 gameOfLife(maxGenerations, currentGeneration + 1)
             } else {
-                StateT(IO.monad()) { IO { Tuple2(it, it) } }
+                StateT.just(IO.monad(), it)
             }
         }
     }
