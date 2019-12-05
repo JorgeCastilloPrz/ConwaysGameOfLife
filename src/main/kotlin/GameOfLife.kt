@@ -62,8 +62,7 @@ private fun Universe.tick(): Tuple2<Universe, Universe> {
         column.map { cell ->
             val aliveNeighbors = cell.aliveNeighbours(this).size
             when {
-                aliveNeighbors < 2 -> Cell.Dead()
-                aliveNeighbors > 3 -> Cell.Dead()
+                aliveNeighbors < 2 || aliveNeighbors > 3 -> Cell.Dead()
                 aliveNeighbors == 3 && cell.isDead() -> Cell.Alive()
                 else -> Cell.Alive()
             }
