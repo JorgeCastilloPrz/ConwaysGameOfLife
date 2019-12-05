@@ -4,11 +4,11 @@ import GenerationCount.Finite
 import GenerationCount.Infinite
 import arrow.core.*
 import arrow.core.extensions.list.functorFilter.filterMap
-import arrow.core.extensions.list.functorFilter.flattenOption
 import arrow.core.extensions.list.semigroupal.times
-import arrow.mtl.State
-import arrow.mtl.run
-import arrow.typeclasses.internal.IdBimonad
+import arrow.fx.ForIO
+import arrow.fx.IO
+import arrow.fx.extensions.io.monad.monad
+import arrow.mtl.StateT
 
 sealed class Cell {
     class Alive : Cell()
@@ -76,25 +76,33 @@ sealed class GenerationCount {
     data class Finite(val count: Int) : GenerationCount()
 }
 
-fun gameOfLife(maxGenerations: GenerationCount = Infinite, currentGeneration: Int = 0): State<Universe, Universe> =
-    State { universe: Universe ->
-        // State is pure since it defers the execution until you call run. Once we do it, it'll become unsafe.
-        println(universe)
-        universe.tick()
-    }.flatMap(IdBimonad) {
+/**
+ * StateT is pure since it defers the execution until you call run. Once we do it, it'll become unsafe, that's why we've
+ * picked StateT over IO.
+ */
+fun gameOfLife(
+    maxGenerations: GenerationCount = Infinite,
+    currentGeneration: Int = 0
+): StateT<ForIO, Universe, Universe> =
+    StateT(IO.monad()) { universe: Universe ->
+        IO {
+            println(universe)
+            universe.tick()
+        }
+    }.flatMap(IO.monad()) {
         when (maxGenerations) {
             is Infinite -> gameOfLife(maxGenerations, currentGeneration + 1)
             is Finite -> if (currentGeneration < maxGenerations.count - 1) {
                 gameOfLife(maxGenerations, currentGeneration + 1)
             } else {
-                State { Tuple2(it, it) }
+                StateT(IO.monad()) { IO { Tuple2(it, it) } }
             }
         }
     }
 
 fun main() {
     // State provides a convenient run method to run it using an initial state.
-    gameOfLife(Finite(3)).run(initialSeed())
+    gameOfLife(Finite(3)).run(IO.monad(), initialSeed())
 }
 
 private fun initialSeed(): List<List<Cell>> =

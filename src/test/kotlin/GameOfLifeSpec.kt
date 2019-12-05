@@ -1,6 +1,10 @@
 import GenerationCount.Finite
 import arrow.core.some
+import arrow.fx.IO
+import arrow.fx.extensions.io.monad.monad
+import arrow.fx.fix
 import arrow.mtl.run
+import arrow.mtl.runM
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 import io.kotlintest.specs.StringSpec
@@ -49,7 +53,7 @@ class GameOfLifeSpec : StringSpec({
                 )
             }
 
-            val finalState = gameOfLife(Finite(1)).run(initialSeed).a
+            val finalState = gameOfLife(Finite(1)).run(IO.monad(), initialSeed).fix().unsafeRunSync().a
 
             finalState[1][1].isAlive()
         }
@@ -62,7 +66,7 @@ class GameOfLifeSpec : StringSpec({
             listOf(Cell.Alive(), Cell.Dead(), Cell.Dead())
         )
 
-        val finalState = gameOfLife(Finite(1)).run(initialSeed).a
+        val finalState = gameOfLife(Finite(1)).run(IO.monad(), initialSeed).fix().unsafeRunSync().a
 
         assertTrue(finalState[1][1].isAlive())
     }
@@ -74,7 +78,7 @@ class GameOfLifeSpec : StringSpec({
             listOf(Cell.Dead(), Cell.Dead(), Cell.Dead())
         )
 
-        val finalState = gameOfLife(Finite(1)).run(initialSeed).a
+        val finalState = gameOfLife(Finite(1)).run(IO.monad(), initialSeed).fix().unsafeRunSync().a
 
         assertFalse(finalState[1][1].isAlive())
     }
@@ -86,7 +90,7 @@ class GameOfLifeSpec : StringSpec({
             listOf(Cell.Alive(), Cell.Dead(), Cell.Alive())
         )
 
-        val finalState = gameOfLife(Finite(1)).run(initialSeed).a
+        val finalState = gameOfLife(Finite(1)).run(IO.monad(), initialSeed).fix().unsafeRunSync().a
 
         assertFalse(finalState[1][1].isAlive())
     }
