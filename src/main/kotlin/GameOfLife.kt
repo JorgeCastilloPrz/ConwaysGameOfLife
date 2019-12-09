@@ -57,7 +57,7 @@ fun Cell.neighbours(universe: Universe): List<Cell> {
 
 private fun Cell.aliveNeighbours(universe: Universe): List<Cell> = neighbours(universe).filter { it is Cell.Alive }
 
-private fun Universe.tick(): Tuple2<Universe, Universe> {
+private fun Universe.tick(): Tuple2<Universe, Unit> {
     val newGeneration = this.map { column ->
         column.map { cell ->
             val aliveNeighbors = cell.aliveNeighbours(this).size
@@ -68,7 +68,7 @@ private fun Universe.tick(): Tuple2<Universe, Universe> {
             }
         }.k()
     }.k()
-    return Tuple2(newGeneration, newGeneration)
+    return Tuple2(newGeneration, Unit)
 }
 
 sealed class GenerationCount {
@@ -83,7 +83,7 @@ sealed class GenerationCount {
 fun gameOfLife(
     maxGenerations: GenerationCount = Infinite,
     currentGeneration: Int = 0
-): StateT<ForIO, Universe, Universe> =
+): StateT<ForIO, Universe, Unit> =
     StateT(IO.monad()) { universe: Universe ->
         IO {
             println(universe)
