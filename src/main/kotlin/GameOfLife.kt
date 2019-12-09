@@ -68,7 +68,7 @@ private fun Universe.tick(): Tuple2<Universe, Unit> {
             }
         }.k()
     }.k()
-    return Tuple2(newGeneration, Unit)
+    return newGeneration toT Unit
 }
 
 sealed class GenerationCount {
