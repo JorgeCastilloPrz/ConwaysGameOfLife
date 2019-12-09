@@ -30,6 +30,6 @@ class UniverseGen(private val center: Cell, private val aliveNeighbors: Int) : G
         )
 }
 
-fun universeGenWith2or3AliveNeighbours(cell: Cell) = UniverseGen(cell, Gen.choose(2, 3).random().first())
-fun universeGenFewerThan2AliveNeighbours(cell: Cell) = UniverseGen(cell, Gen.choose(0, 1).random().first())
-fun universeGenMoreThan3AliveNeighbours(cell: Cell) = UniverseGen(cell, Gen.choose(4, 999).random().first())
+fun universeGenWith2or3AliveNeighbours(cell: Cell) = Gen.choose(2, 3).flatMap { UniverseGen(cell, it) }
+fun universeGenFewerThan2AliveNeighbours(cell: Cell) = Gen.choose(0, 1).flatMap { UniverseGen(cell, it) }
+fun universeGenMoreThan3AliveNeighbours(cell: Cell) = Gen.choose(4, 999).flatMap { UniverseGen(cell, it) }
