@@ -48,9 +48,9 @@ fun Universe.cellPosition(cell: Cell): Option<Position> =
     }
 
 fun Cell.neighbours(universe: Universe): List<Cell> {
-    val deltas = listOf(-1, 0, 1) * listOf(-1, 0, 1) // ListK cartesian product to get all combinations
+    val allDeltaCombinations = listOf(-1, 0, 1) * listOf(-1, 0, 1) // ListK cartesian product to get all combinations
+    val deltas = allDeltaCombinations - Tuple2(0, 0)
     return deltas
-        .filter { it.a != 0 || it.b != 0 }
         .filterMap { universe.cellPosition(this).shiftBy(universe, it) }
         .map { universe[it.x][it.y] }
 }
