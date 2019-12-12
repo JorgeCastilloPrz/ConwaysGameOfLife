@@ -9,10 +9,17 @@ import arrow.fx.ForIO
 import arrow.fx.IO
 import arrow.fx.extensions.io.monad.monad
 import arrow.mtl.StateT
+import java.util.*
 
 sealed class Cell {
-    class Alive : Cell()
-    class Dead : Cell()
+    abstract val id: String
+
+    data class Alive(override val id: String) : Cell() {
+        constructor() : this(generateId())
+    }
+    data class Dead(override val id: String) : Cell() {
+        constructor() : this(generateId())
+    }
 }
 
 fun Cell.isDead() = !isAlive()
@@ -111,3 +118,5 @@ private fun initialSeed(): List<List<Cell>> =
         listOf(Cell.Alive(), Cell.Dead(), Cell.Alive()),
         listOf(Cell.Dead(), Cell.Alive(), Cell.Dead())
     )
+
+private fun generateId(): String = UUID.randomUUID().toString()
