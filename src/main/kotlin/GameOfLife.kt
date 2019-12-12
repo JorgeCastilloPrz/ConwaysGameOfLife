@@ -8,6 +8,7 @@ import arrow.core.extensions.list.semigroupal.times
 import arrow.fx.ForIO
 import arrow.fx.IO
 import arrow.fx.extensions.io.monad.monad
+import arrow.fx.fix
 import arrow.mtl.StateT
 import java.util.*
 
@@ -109,7 +110,7 @@ fun gameOfLife(
 
 fun main() {
     // State provides a convenient run method to run it using an initial state.
-    gameOfLife(Finite(3)).run(IO.monad(), initialSeed())
+    gameOfLife(Finite(3)).run(IO.monad(), initialSeed()).fix().unsafeRunSync()
 }
 
 private fun initialSeed(): List<List<Cell>> =
